@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Praneel Patel</title>
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(315deg, rgba(10,10,10,1) 3%, rgba(40,40,40,1) 38%, rgba(70,70,70,1) 68%, rgba(20,20,20,1) 98%);
+            animation: gradient 15s ease infinite;
+            background-size: 400% 400%;
+            background-attachment: fixed;
+            color: #e5e5e5;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 100% 100%;
+            }
+            100% {
+                background-position: 0% 0%;
+            }
+        }
+
+        /* Animated Wave Background */
+        .wave {
+            background: rgba(50, 50, 50, 0.4);
+            border-radius: 1000% 1000% 0 0;
+            position: fixed;
+            width: 200%;
+            height: 12em;
+            animation: wave 10s -3s linear infinite;
+            transform: translate3d(0, 0, 0);
+            opacity: 0.6;
+            bottom: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .wave:nth-of-type(2) {
+            bottom: -1.25em;
+            animation: wave 18s linear reverse infinite;
+            opacity: 0.5;
+        }
+
+        .wave:nth-of-type(3) {
+            bottom: -2.5em;
+            animation: wave 20s -1s reverse infinite;
+            opacity: 0.4;
+        }
+
+        @keyframes wave {
+            2% {
+                transform: translateX(1);
+            }
+            25% {
+                transform: translateX(-25%);
+            }
+            50% {
+                transform: translateX(-50%);
+            }
+            75% {
+                transform: translateX(-25%);
+            }
+            100% {
+                transform: translateX(1);
+            }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            padding: 1.5rem 3rem;
+            display: flex; justify-content: center; gap: 3rem;
+            z-index: 100;
+            background: rgba(10,10,10,0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        nav a {
+            color: #e5e5e5; text-decoration: none; font-size: 0.9rem;
+            font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 0.5rem 1rem; transition: all 0.3s; position: relative;
+        }
+        nav a::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 0; height: 2px; background: #e5e5e5; transition: width 0.3s;
+        }
+        nav a:hover::after { width: 100%; }
+        nav a:hover { color: #fff; }
+
+        /* Blog Page */
+        .blog-page {
+            position: relative; z-index: 1;
+            min-height: 100vh; padding: 6rem 2rem 4rem 2rem;
+        }
+        .blog-container { max-width: 1200px; margin: 0 auto; }
+        .blog-header { text-align: center; margin-bottom: 4rem; }
+        .blog-header h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; }
+        .blog-header p { font-size: 1.125rem; color: #a0a0a0; }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .blog-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .blog-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+        }
+        .blog-card h3 { font-size: 1.5rem; margin-bottom: 1rem; color: #fff; }
+        .blog-card .date { font-size: 0.875rem; color: #808080; margin-bottom: 1rem; }
+        .blog-card .excerpt { color: #b0b0b0; line-height: 1.7; margin-bottom: 1.5rem; }
+        .blog-card .read-more { color: #e5e5e5; text-decoration: none; font-weight: 500;
+            font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;
+            transition: color 0.3s; }
+        .blog-card .read-more:hover { color: #fff; }
+        .blog-card .read-more::after { content: ' →'; }
+
+        /* Blog Detail Modal */
+        .blog-detail {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            overflow-y: auto; padding: 6rem 2rem 4rem 2rem;
+        }
+        .blog-detail.active { display: block; }
+        .blog-detail-content { max-width: 800px; margin: 0 auto; position: relative; }
+        .close-blog {
+            position: fixed; top: 2rem; right: 2rem;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s; font-size: 1.25rem;
+        }
+        .close-blog:hover { background: rgba(255,255,255,0.2); }
+        .blog-detail h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .blog-detail .blog-meta { color: #808080; margin-bottom: 2rem;
+            padding-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .blog-detail .blog-body { line-height: 1.8; color: #d0d0d0; }
+        .blog-detail .blog-body h3 { font-size: 1.75rem; margin: 2rem 0 1rem 0; color: #fff; }
+        .blog-detail .blog-body p { margin-bottom: 1.5rem; }
+        .blog-detail .blog-image { width: 100%; height: 400px;
+            background: rgba(255,255,255,0.05); margin: 2rem 0;
+            display: flex; align-items: center; justify-content: center;
+            color: #606060; border: 1px solid rgba(255,255,255,0.1); }
+        .blog-detail .blog-body img { width: 100%; height: auto; margin: 2rem 0; border: 1px solid rgba(255,255,255,0.1); }
+
+        @media (max-width: 768px) {
+            .blog-grid { grid-template-columns: 1fr; }
+            nav { padding: 1.5rem 1rem; gap: 1.5rem; }
+            .blog-header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Wave Background -->
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="blog.html">Blogs</a>
+    </nav>
+
+    <!-- Blog Page -->
+    <div class="blog-page">
+        <div class="blog-container">
+            <div class="blog-header">
+                <h1>Blogs</h1>
+                <p>Innovative projects that I have created</p>
+            </div>
+
+            <!-- Blog Grid -->
+            <div class="blog-grid">
+                <!-- Blog Card 1 -->
+                <div class="blog-card" onclick="openBlog(1)">
+                    <h3>16-Bit CPU from Scratch: Architecture, Design, and Implementation</h3>
+                    <div class="date">November 15, 2025</div>
+                    <p class="excerpt">
+                        Exploring and building the main functional unit of a computer: the Central Processing Unit (CPU). This post details the full process of creating a 16-bit CPU, explaining the design, schematics, and construction of each subsystem, including the ALU, registers, control unit, memory interface, and all supporting components. 
+                    </p>
+                    <a href="#" class="read-more" onclick="return false;">Read More</a>
+                </div>
+
+                <!-- 
+                To add more blog cards:
+                1. Copy the div above (blog-card).
+                2. Change the onclick number to a new unique ID (e.g., openBlog(2), openBlog(3), etc.).
+                3. Update the title, date, and excerpt accordingly.
+                -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Detail Modal -->
+    <div class="blog-detail" id="blogDetail">
+        <div class="close-blog" onclick="closeBlog()">×</div>
+        <div class="blog-detail-content" id="blogContent">
+            <!-- Blog content will be loaded here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        // Blog data - ADD YOUR BLOGS HERE
+        const blogs = {
+            1: {
+                title: "16-Bit CPU from Scratch: Architecture, Design, and Implementation",
+                date: "November 15, 2025",
+                content: `
+                    <h2>16-Bit CPU from Scratch: Architecture, Design, and Implementation</h2>
+                    <div class="blog-meta">November 15, 2025</div>
+                    <div class="blog-body">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        
+                        <h3>Introduction</h3>
+                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                        
+                        <div class="blog-image">[Image Placeholder]</div>
+                        
+                        <h3>Technical Details</h3>
+                        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+                        
+                        <h3>Conclusion</h3>
+                        <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+                    </div>
+                `
+            },
+
+            /* 
+            To add more blog data:
+            1. Copy one of the existing entries (like 1 above).
+            2. Change the key to the new unique ID (e.g., 2, 3, 4, etc.).
+            3. Update the title, date, and content.
+            */
+        };
+
+        function openBlog(id) {
+            const blogDetail = document.getElementById('blogDetail');
+            const blogContent = document.getElementById('blogContent');
+            
+            if (blogs[id]) {
+                blogContent.innerHTML = blogs[id].content;
+                blogDetail.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeBlog() {
+            const blogDetail = document.getElementById('blogDetail');
+            blogDetail.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</body>
+</html>
