@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Praneel Patel</title>
+    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Prism.js syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(315deg, rgba(10,10,10,1) 3%, rgba(40,40,40,1) 38%, rgba(70,70,70,1) 68%, rgba(20,20,20,1) 98%);
+            animation: gradient 15s ease infinite;
+            background-size: 400% 400%;
+            background-attachment: fixed;
+            color: #e5e5e5;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        .wave {
+            background: rgba(50, 50, 50, 0.4);
+            border-radius: 1000% 1000% 0 0;
+            position: fixed;
+            width: 200%; height: 12em;
+            animation: wave 10s -3s linear infinite;
+            transform: translate3d(0, 0, 0);
+            opacity: 0.6; bottom: 0; left: 0; z-index: 0;
+        }
+        .wave:nth-of-type(2) { bottom: -1.25em; animation: wave 18s linear reverse infinite; opacity: 0.5; }
+        .wave:nth-of-type(3) { bottom: -2.5em; animation: wave 20s -1s reverse infinite; opacity: 0.4; }
+
+        @keyframes wave {
+            2%   { transform: translateX(1); }
+            25%  { transform: translateX(-25%); }
+            50%  { transform: translateX(-50%); }
+            75%  { transform: translateX(-25%); }
+            100% { transform: translateX(1); }
+        }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            padding: 1.5rem 3rem;
+            display: flex; justify-content: center; gap: 3rem;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        nav a {
+            color: #e5e5e5; text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 0.5rem 1rem; transition: all 0.3s; position: relative;
+        }
+        nav a::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 0; height: 2px; background: #e5e5e5; transition: width 0.3s;
+        }
+        nav a:hover::after { width: 100%; }
+        nav a:hover { color: #fff; }
+
+        .blog-page { position: relative; z-index: 1; min-height: 100vh; padding: 6rem 2rem 4rem 2rem; }
+        .blog-container { max-width: 1200px; margin: 0 auto; }
+        .blog-header { text-align: center; margin-bottom: 4rem; }
+        .blog-header h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; }
+        .blog-header p { font-size: 1.125rem; color: #a0a0a0; }
+
+        .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem; }
+
+        .blog-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem; transition: all 0.3s; cursor: pointer;
+        }
+        .blog-card:hover {
+            background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+        }
+        .blog-card h3 { font-size: 1.5rem; margin-bottom: 1rem; color: #fff; }
+        .blog-card .date { font-size: 0.875rem; color: #808080; margin-bottom: 1rem; }
+        .blog-card .excerpt { color: #b0b0b0; line-height: 1.7; margin-bottom: 1.5rem; }
+        .blog-card .read-more {
+            color: #e5e5e5; text-decoration: none; font-weight: 500;
+            font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.3s;
+        }
+        .blog-card .read-more:hover { color: #fff; }
+        .blog-card .read-more::after { content: ' →'; }
+
+        .blog-detail {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 1000;
+            overflow-y: auto; padding: 6rem 2rem 4rem 2rem;
+        }
+        .blog-detail.active { display: block; }
+        .blog-detail-content { max-width: 800px; margin: 0 auto; position: relative; }
+
+        .close-blog {
+            position: fixed; top: 2rem; right: 2rem;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s; font-size: 1.25rem;
+        }
+        .close-blog:hover { background: rgba(255,255,255,0.2); }
+
+        .blog-detail h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .blog-detail .blog-meta {
+            color: #808080; margin-bottom: 2rem;
+            padding-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .blog-detail .blog-body { line-height: 1.8; color: #d0d0d0; }
+        .blog-detail .blog-body h3 { font-size: 1.5rem; margin: 2.5rem 0 1rem 0; color: #fff; }
+        .blog-detail .blog-body h4 { font-size: 1.05rem; margin: 1.75rem 0 0.6rem 0; color: #ddd; font-weight: 600; }
+        .blog-detail .blog-body p { margin-bottom: 1.5rem; }
+        .blog-detail .blog-body ul, .blog-detail .blog-body ol {
+            margin: 0 0 1.5rem 1.5rem; color: #c0c0c0; line-height: 1.9;
+        }
+        .blog-detail .blog-body li { margin-bottom: 0.4rem; }
+        .blog-detail .blog-body img {
+            width: 100%; height: auto; margin: 2rem 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Code block wrapper with language badge */
+        .blog-detail .blog-body .code-block {
+            position: relative;
+            margin: 1.5rem 0 2rem 0;
+        }
+        .blog-detail .blog-body .code-block .lang-badge {
+            position: absolute;
+            top: 0; right: 0;
+            background: rgba(255,255,255,0.07);
+            border-bottom-left-radius: 4px;
+            padding: 0.2rem 0.65rem;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #777;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            z-index: 2;
+            pointer-events: none;
+        }
+        /* Override Prism's default margin/border-radius so it fits flush */
+        .blog-detail .blog-body .code-block pre[class*="language-"] {
+            margin: 0 !important;
+            border-radius: 0 !important;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.84rem !important;
+            line-height: 1.75 !important;
+            background: #1d1f21 !important;
+        }
+        .blog-detail .blog-body .code-block code[class*="language-"] {
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace !important;
+            font-size: 0.84rem !important;
+        }
+
+        /* Inline code (p and li) */
+        .blog-detail .blog-body p code,
+        .blog-detail .blog-body li code {
+            background: rgba(255,255,255,0.07);
+            padding: 0.15rem 0.4rem; font-size: 0.85em; color: #c8d6e5;
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+        }
+
+        /* Tables */
+        .key-table, .bom-table {
+            width: 100%; border-collapse: collapse;
+            margin: 1.5rem 0 2rem 0; font-size: 0.9rem;
+        }
+        .key-table th, .bom-table th {
+            background: rgba(255,255,255,0.08); color: #fff;
+            padding: 0.75rem 1rem; text-align: left;
+            border: 1px solid rgba(255,255,255,0.15);
+            font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .key-table td, .bom-table td {
+            padding: 0.65rem 1rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #c0c0c0; vertical-align: middle;
+        }
+        .key-table tr:hover td, .bom-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        .color-dot {
+            display: inline-block; width: 11px; height: 11px;
+            border-radius: 50%; margin-right: 7px; vertical-align: middle;
+        }
+
+        /* Callout */
+        .callout {
+            background: rgba(255,255,255,0.04);
+            border-left: 3px solid rgba(255,255,255,0.25);
+            padding: 1rem 1.25rem; margin: 1.5rem 0 2rem 0;
+            color: #a8a8a8; font-size: 0.93rem; line-height: 1.75;
+        }
+
+        .img-caption {
+            color: #555; font-size: 0.82rem;
+            margin-top: -1.5rem; margin-bottom: 2rem; text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .blog-grid { grid-template-columns: 1fr; }
+            nav { padding: 1.5rem 1rem; gap: 1.5rem; }
+            .blog-header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="blog.html">Blogs</a>
+    </nav>
+
+    <div class="blog-page">
+        <div class="blog-container">
+            <div class="blog-header">
+                <h1>Blogs</h1>
+                <p>Innovative projects that I have created</p>
+            </div>
+
+            <div class="blog-grid">
+                <div class="blog-card" onclick="openBlog(1)">
+                    <h3>Custom 6-Key Macropad for macOS</h3>
+                    <div class="date">March 1, 2026</div>
+                    <p class="excerpt">
+                        A compact 6-key macropad built from scratch — custom PCB in KiCad, enclosure in Fusion, and KMK firmware in CircuitPython. Features tap/hold combos on an XIAO RP2040 for screenshots, clipboard, app switching, undo/redo, sleep, and quit, with per-key NeoPixel color feedback.
+                    </p>
+                    <a href="#" class="read-more" onclick="return false;">Read More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="blog-detail" id="blogDetail">
+        <div class="close-blog" onclick="closeBlog()">×</div>
+        <div class="blog-detail-content" id="blogContent"></div>
+    </div>
+
+    <script>
+        const blogs = {
+            1: {
+                title: "Custom 6-Key Macropad for macOS",
+                date: "March 1, 2026",
+                content: `
+                <h2>Custom 6-Key Macropad for macOS</h2>
+                <div class="blog-meta">March 1, 2026 &nbsp;·&nbsp; Hardware &nbsp;·&nbsp; KMK &nbsp;·&nbsp; CircuitPython &nbsp;·&nbsp; RP2040</div>
+                <div class="blog-body">
+
+                    <p>This project is a fully custom 6-key macropad built from the ground up — PCB designed in KiCad, enclosure modeled in Autodesk Fusion, and firmware written in CircuitPython using the KMK framework. It is purpose-built for macOS and optimized around the shortcuts I reach for most often as a student.</p>
+
+                    <h3>Motivation</h3>
+                    <p>The idea came from a simple frustration: macOS has powerful shortcuts, but many of them require awkward three-key chord combinations that interrupt your flow mid-task. I wanted a dedicated device where every key does exactly one thing — or two things, depending on whether you tap or hold it. Rather than buying an off-the-shelf product, I designed every layer of the stack myself: PCB trace routing, case geometry, and firmware key definitions.</p>
+
+                    <h3>Hardware Design</h3>
+
+                    <h4>Overall Assembly</h4>
+                    <p>The enclosure consists of two 3D-printed shells — a top case and a bottom base — that mate together with four US #6 screws. The custom PCB sits inside the bottom base, and the six Cherry MX keyswitches protrude through cutouts in the top case. The microcontroller connects to a host machine via USB-C for both power and HID communication.</p>
+
+                    <img src="assets/final%20macropad.jpg" alt="Completed Macropad">
+                    <p class="img-caption">Completed macropad!</p>
+
+                    <h4>PCB Design</h4>
+                    <p>The PCB was designed in KiCad using the <code>Cherry_MX_1.00u_PCB</code> footprint for each of the six switches. The switches are wired in a direct-pin configuration — one GPIO pin per switch — rather than a traditional row/column matrix. This eliminates the need for diodes entirely (no ghosting is possible with only six keys), significantly simplifies the schematic, and reduces trace complexity on the board.</p>
+                    <p>The XIAO RP2040 was chosen as the microcontroller because it is compact enough to fit within the footprint of the macropad, natively supports CircuitPython, has more than enough GPIO pins for direct wiring, and includes an onboard NeoPixel RGB LED that is used for visual key feedback.</p>
+
+                    <img src="assets/PCB.png" alt="PCB Layout">
+                    <p class="img-caption">PCB layout</p>
+
+                    <h4>Schematic</h4>
+                    <img src="assets/Schematic.png" alt="Schematic">
+                    <p class="img-caption">Electrical schematic</p>
+
+                    <h4>Bill of Materials</h4>
+                    <table class="bom-table">
+                        <thead>
+                            <tr><th>Qty</th><th>Part</th><th>Notes</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>XIAO RP2040 DIP</td><td>Microcontroller — runs CircuitPython + KMK, has onboard NeoPixel</td></tr>
+                            <tr><td>6</td><td>Cherry MX Switches</td><td>Any MX-compatible switch works with the PCB footprint</td></tr>
+                            <tr><td>1</td><td>Custom PCB</td><td>Designed in KiCad, direct-pin wiring, no diodes required</td></tr>
+                            <tr><td>1</td><td>3D Printed Enclosure</td><td>Top case + bottom base, printed separately and joined with screws</td></tr>
+                            <tr><td>1</td><td>USB-C Cable</td><td>Power and HID data to host</td></tr>
+                            <tr><td>4</td><td>Screws (US #6)</td><td>Joins top and bottom case halves</td></tr>
+                            <tr><td>Misc</td><td>Wires / solder / pin headers</td><td>For MCU-to-PCB connections</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Firmware</h3>
+
+                    <h4>Stack: CircuitPython + KMK</h4>
+                    <p>The firmware runs on CircuitPython with <a href="https://github.com/KMKfw/kmk_firmware" style="color:#aaa;">KMK</a>: an open-source keyboard firmware framework written entirely in Python. KMK handles USB HID communication, key scanning, debouncing, and advanced behaviors like tap/hold out of the box. Two KMK modules are used here:</p>
+                    <ul>
+                        <li><strong>HoldTap</strong> — allows a single physical key to emit one keycode on a short tap and a different keycode when held beyond a configurable threshold (default ~200 ms).</li>
+                        <li><strong>Macros</strong> — provides the ability to send multi-key combinations as a single action, used here for modifier combos like <code>&#8984;&#8679;4</code>.</li>
+                    </ul>
+
+                    <h4>Key Assignments</h4>
+                    <p>Each of the six switches is wired to a GPIO pin and mapped to one or two macOS shortcuts. Three keys use HoldTap for dual functionality; the remaining three fire a single action immediately on press with no hold delay.</p>
+
+                    <table class="key-table">
+                        <thead>
+                            <tr><th>Key</th><th>Pin</th><th>LED Color</th><th>Tap</th><th>Hold</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td><td><code>D1</code></td>
+                                <td><span class="color-dot" style="background:#ff2222;"></span>Red</td>
+                                <td>Area Screenshot — <code>&#8984;&#8679;4</code></td>
+                                <td>Full Screenshot — <code>&#8984;&#8679;3</code></td>
+                            </tr>
+                            <tr>
+                                <td>2</td><td><code>D8</code></td>
+                                <td><span class="color-dot" style="background:#00ee00;"></span>Green</td>
+                                <td>Copy — <code>&#8984;C</code></td>
+                                <td>Paste — <code>&#8984;V</code></td>
+                            </tr>
+                            <tr>
+                                <td>3</td><td><code>D9</code></td>
+                                <td><span class="color-dot" style="background:#4488ff;"></span>Blue</td>
+                                <td colspan="2" style="text-align:center;">App Switcher — <code>&#8984;Tab</code> (no hold)</td>
+                            </tr>
+                            <tr>
+                                <td>4</td><td><code>D10</code></td>
+                                <td><span class="color-dot" style="background:#dddd00;"></span>Yellow</td>
+                                <td>Undo — <code>&#8984;Z</code></td>
+                                <td>Redo — <code>&#8984;&#8679;Z</code></td>
+                            </tr>
+                            <tr>
+                                <td>5</td><td><code>D0</code></td>
+                                <td><span class="color-dot" style="background:#ff00ff;"></span>Magenta</td>
+                                <td colspan="2" style="text-align:center;">Sleep — <code>&#8984;&#8679;9</code> (no hold)</td>
+                            </tr>
+                            <tr>
+                                <td>6</td><td><code>D5</code></td>
+                                <td><span class="color-dot" style="background:#00dddd;"></span>Cyan</td>
+                                <td colspan="2" style="text-align:center;">Quit App — <code>&#8984;Q</code> (no hold)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="callout">
+                        Keys 3, 5, and 6 are defined as plain <code>KC.LCMD()</code> keycodes rather than <code>KC.HT()</code>. Because they do not use HoldTap, they fire on press with zero latency — there is no timeout window to wait through.
+                    </div>
+
+                    <h4>NeoPixel Feedback</h4>
+                    <p>The XIAO RP2040 has a single onboard NeoPixel RGB LED. Each key is assigned a distinct color, and whenever a key is pressed, the LED updates to that key's color. This is implemented by monkey-patching KMK's internal <code>_on_matrix_changed</code> handler: the original handler is stored, a custom wrapper checks whether the event is a press and updates the LED accordingly, then delegates to the original handler to preserve all normal KMK behavior.</p>
+
+                    <h4>Full Firmware</h4>
+                    <div class="code-block">
+                        <span class="lang-badge">Python</span>
+                        <pre><code class="language-python">import board
+import neopixel
+from kmk.kmk_keyboard import KMKKeyboard
+from kmk.scanners.keypad import KeysScanner
+from kmk.keys import KC
+from kmk.modules.macros import Press, Release, Tap, Macros
+from kmk.modules.holdtap import HoldTap
+
+keyboard = KMKKeyboard()
+
+macros = Macros()
+holdtap = HoldTap()
+keyboard.modules.append(macros)
+keyboard.modules.append(holdtap)
+
+pixel = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.3)
+
+COLORS = [
+    (255, 0,   0),    # Key 1 - Red
+    (0,   255, 0),    # Key 2 - Green
+    (0,   0,   255),  # Key 3 - Blue
+    (255, 255, 0),    # Key 4 - Yellow
+    (255, 0,   255),  # Key 5 - Magenta
+    (0,   255, 255),  # Key 6 - Cyan
+]
+
+PINS = [board.D1, board.D8, board.D9, board.D10, board.D0, board.D5]
+keyboard.matrix = KeysScanner(pins=PINS, value_when_pressed=False)
+
+SCREENSHOT_AREA = KC.LCMD(KC.LSFT(KC.N4))  # Cmd+Shift+4 - area screenshot
+SCREENSHOT_FULL = KC.LCMD(KC.LSFT(KC.N3))  # Cmd+Shift+3 - full screenshot
+COPY       = KC.LCMD(KC.C)
+PASTE      = KC.LCMD(KC.V)
+APP_SWITCH = KC.LCMD(KC.TAB)
+UNDO       = KC.LCMD(KC.Z)
+REDO       = KC.LCMD(KC.LSFT(KC.Z))
+SLEEP      = KC.LCMD(KC.LSFT(KC.N9))
+QUIT       = KC.LCMD(KC.Q)
+
+keyboard.keymap = [[
+    KC.HT(SCREENSHOT_AREA, SCREENSHOT_FULL),  # D1  - Tap=area shot, Hold=full shot
+    KC.HT(COPY, PASTE),                       # D8  - Tap=Copy,      Hold=Paste
+    APP_SWITCH,                               # D9  - App switcher (immediate)
+    KC.HT(UNDO, REDO),                        # D10 - Tap=Undo,      Hold=Redo
+    SLEEP,                                    # D0  - Sleep (immediate)
+    QUIT,                                     # D5  - Quit app (immediate)
+]]
+
+original_on_matrix_changed = keyboard._on_matrix_changed
+
+def custom_on_matrix_changed(event):
+    if event.pressed and event.key_number &lt; len(COLORS):
+        pixel[0] = COLORS[event.key_number]
+        pixel.show()
+    return original_on_matrix_changed(event)
+
+keyboard._on_matrix_changed = custom_on_matrix_changed
+
+if __name__ == '__main__':
+    keyboard.go()</code></pre>
+                    </div>
+
+                    <h3>Challenges &amp; Lessons Learned</h3>
+
+                    <h4>Tap/Hold Timing</h4>
+                    <p>The default HoldTap timeout in KMK (~200 ms) worked well for most keys, but the Copy/Paste key initially triggered Paste too readily during fast repeated tapping. This is a known ergonomic tradeoff with tap/hold: the shorter the timeout, the more responsive taps feel, but the easier it is to accidentally trigger a hold. KMK exposes this as <code>holdtap.tap_time</code> and it is worth tuning per individual typing speed. A value around 180–250 ms tends to be the sweet spot for most users.</p>
+
+                    <h4>Direct-Pin vs. Matrix Wiring</h4>
+                    <p>Choosing <code>KeysScanner</code> with direct pins rather than a row/column matrix simplified both the PCB and firmware considerably. With only six keys, a matrix would add complexity for no benefit since it exists to reduce the number of GPIO pins needed at scale, which was irrelevant in my case. Dropping the matrix eliminates diodes and simplifies routing. The RP2040 has 11 available GPIO pins on the XIAO, so consuming one per key is not a constraint at this scale.</p>
+
+                    <h4>KiCad Footprint Variant</h4>
+                    <p>KiCad's Cherry MX footprint library includes both PCB-mount and plate-mount variants. Using the wrong one means the switch's plastic mounting legs will not align with the PCB holes, making the switch sit at the wrong height or refuse to seat at all. The correct footprint for switches mounting directly to a PCB (without a separate metal switch plate) is <code>Cherry_MX_1.00u_PCB</code>.</p>
+
+                </div>
+                `
+            }
+        };
+
+        function openBlog(id) {
+            const blogDetail = document.getElementById('blogDetail');
+            const blogContent = document.getElementById('blogContent');
+            if (blogs[id]) {
+                blogContent.innerHTML = blogs[id].content;
+                blogDetail.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                // Re-run Prism after content is injected into the DOM
+                if (typeof Prism !== 'undefined') Prism.highlightAll();
+            }
+        }
+
+        function closeBlog() {
+            document.getElementById('blogDetail').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</body>
+</html>
